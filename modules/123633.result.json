@@ -1,0 +1,28 @@
+{
+  "cve": "CVE-2026-123633",
+  "binary": {
+    "1.31.8": "/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx",
+    "1.31.9": "/app/data/sessions/conv-43/build/inst-fixed/sbin/nginx"
+  },
+  "version": {
+    "1.31.8": "nginx version: nginx/1.31.8",
+    "1.31.9": "nginx version: nginx/1.31.9"
+  },
+  "results": {
+    "1.31.8": {
+      "cve": "CVE-2026-123633",
+      "configured": true,
+      "trigger": "worker_connections 64 で HTTP/2 の HEADERS 先頭 1 バイトのみ送って reusable 登録 → HTTP/1 keep-alive でスロットを埋める → 残り HEADERS でストリーム生成 → upstream 接続要求の drain が自分の HTTP/2 接続を close → GOAWAY 書き込み失敗 (クライアント RST) → finalize で リクエスト解放 → UAF。",
+      "effect": "CRASH",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-B/cve-2026-123633 / attempts=nkeep=56 crash=1 h2reuse=1 drain=1 reset=0 / backend ヒット数=0 / drain 発動回数=1 / h2 再利用回数=1 / stream 生成直後の reusable 解除: なし（1.31.8） / クラッシュ: 2026/11/18 16:50:13 [alert] 135227#0: worker process 135228 exited on signal 11 / 検出したワーカー異常終了: 1 件 / drain がストリーム持ち HTTP/2 接続を再利用: 2026/11/18 16:50:13 [debug] 135228#0: *2 http2 send GOAWAY frame: last sid 1, error 0"
+    },
+    "1.31.9": {
+      "cve": "CVE-2026-123633",
+      "configured": true,
+      "trigger": "worker_connections 64 で HTTP/2 の HEADERS 先頭 1 バイトのみ送って reusable 登録 → HTTP/1 keep-alive でスロットを埋める → 残り HEADERS でストリーム生成 → upstream 接続要求の drain が自分の HTTP/2 接続を close → GOAWAY 書き込み失敗 (クライアント RST) → finalize で リクエスト解放 → UAF。",
+      "effect": "TRIGGERED",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-B/cve-2026-123633 / attempts=nkeep=56 crash=0 h2reuse=0 drain=1 reset=1, nkeep=55 crash=0 h2reuse=0 drain=0 reset=1, nkeep=57 crash=0 h2reuse=0 drain=1 reset=0, nkeep=54 crash=0 h2reuse=0 drain=0 reset=1, nkeep=58 crash=0 h2reuse=0 drain=1 reset=0 / backend ヒット数=0 / drain 発動回数=3 / h2 再利用回数=0 / stream 生成直後の reusable 解除: あり（1.31.9 の修正挙動） / drain は発動したがストリーム持ち HTTP/2 接続は再利用されず、クラッシュも無し（修正版の挙動）"
+    }
+  },
+  "summary": "1.31.8 は drain がストリーム持ち HTTP/2 接続を再利用し (GOAWAY last sid 1)、GOAWAY 書き込み失敗でリクエスト解放 → signal 11 (CRASH)。1.31.9 はストリーム生成時に reusable 状態を解除するため drain に選ばれず、クラッシュしない (TRIGGERED)。"
+}

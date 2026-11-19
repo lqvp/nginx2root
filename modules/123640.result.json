@@ -1,0 +1,62 @@
+{
+  "cve": "CVE-2026-123640",
+  "module": "modules/123640.py",
+  "generated_at": "2026-11-18T18:19:21",
+  "ports": {
+    "listen": 18449,
+    "backend": 19010
+  },
+  "workdir": "/app/data/sessions/conv-43/poc-run-F",
+  "results": {
+    "vuln-1.31.8": {
+      "cve": "CVE-2026-123640",
+      "configured": true,
+      "trigger": "stream ssl_preread (listen 127.0.0.1:18449) で map 振り分けを構成し、悪意ある ClientHello (SNI/ALPN 重複・trailing data・拡張長不一致) を送信。脆弱版は変数を抽出して非 default バックエンドへ振り分け、修正版は NGX_DECLINED で変数未設定 -> default (接続拒否) となる差で判定。",
+      "effect": "VULNERABLE",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-123640/run / 振り分け結果: {\"sni-valid\": \"real\", \"alpn-valid\": \"real\", \"dup-sni\": \"real\", \"dup-alpn\": \"real\", \"sni-trailing\": \"real\", \"alpn-trailing\": \"real\", \"supver-trailing\": \"real\", \"extlen-short\": \"real\", \"extlen-long\": \"real\"} / sanity (整形 ClientHello -> 実バックエンド): OK / malformed ClientHello が 非 default へ振り分けられた: YES / default 振り分け先 (127.0.0.2:19010) への connect 拒否ログ: 0 件 / ssl preread debug 行: 13 件"
+    },
+    "fixed-1.31.9": {
+      "cve": "CVE-2026-123640",
+      "configured": true,
+      "trigger": "stream ssl_preread (listen 127.0.0.1:18449) で map 振り分けを構成し、悪意ある ClientHello (SNI/ALPN 重複・trailing data・拡張長不一致) を送信。脆弱版は変数を抽出して非 default バックエンドへ振り分け、修正版は NGX_DECLINED で変数未設定 -> default (接続拒否) となる差で判定。",
+      "effect": "TRIGGERED",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-123640/run / 振り分け結果: {\"sni-valid\": \"real\", \"alpn-valid\": \"real\", \"dup-sni\": \"<ConnectionResetError>\", \"dup-alpn\": \"<ConnectionResetError>\", \"sni-trailing\": \"<ConnectionResetError>\", \"alpn-trailing\": \"<ConnectionResetError>\", \"supver-trailing\": \"<ConnectionResetError>\", \"extlen-short\": \"<ConnectionResetError>\", \"extlen-long\": \"<ConnectionResetError>\"} / sanity (整形 ClientHello -> 実バックエンド): OK / malformed ClientHello が 非 default へ振り分けられた: NO / default 振り分け先 (127.0.0.2:19010) への connect 拒否ログ: 7 件 / ssl preread debug 行: 18 件 / 拒否ログ例: 2026/11/18 18:19:22 [debug] 188660#0: *6 ssl preread: duplicate SNI"
+    },
+    "asan-vuln-1.31.8": {
+      "cve": "CVE-2026-123640",
+      "configured": true,
+      "trigger": "stream ssl_preread (listen 127.0.0.1:18449) で map 振り分けを構成し、悪意ある ClientHello (SNI/ALPN 重複・trailing data・拡張長不一致) を送信。脆弱版は変数を抽出して非 default バックエンドへ振り分け、修正版は NGX_DECLINED で変数未設定 -> default (接続拒否) となる差で判定。",
+      "effect": "VULNERABLE",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-123640/run / 振り分け結果: {\"sni-valid\": \"real\", \"alpn-valid\": \"real\", \"dup-sni\": \"real\", \"dup-alpn\": \"real\", \"sni-trailing\": \"real\", \"alpn-trailing\": \"real\", \"supver-trailing\": \"real\", \"extlen-short\": \"real\", \"extlen-long\": \"real\"} / sanity (整形 ClientHello -> 実バックエンド): OK / malformed ClientHello が 非 default へ振り分けられた: YES / default 振り分け先 (127.0.0.2:19010) への connect 拒否ログ: 0 件 / ssl preread debug 行: 13 件"
+    },
+    "asan-fixed-1.31.9": {
+      "cve": "CVE-2026-123640",
+      "configured": true,
+      "trigger": "stream ssl_preread (listen 127.0.0.1:18449) で map 振り分けを構成し、悪意ある ClientHello (SNI/ALPN 重複・trailing data・拡張長不一致) を送信。脆弱版は変数を抽出して非 default バックエンドへ振り分け、修正版は NGX_DECLINED で変数未設定 -> default (接続拒否) となる差で判定。",
+      "effect": "TRIGGERED",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-123640/run / 振り分け結果: {\"sni-valid\": \"real\", \"alpn-valid\": \"real\", \"dup-sni\": \"<ConnectionResetError>\", \"dup-alpn\": \"<ConnectionResetError>\", \"sni-trailing\": \"<ConnectionResetError>\", \"alpn-trailing\": \"<ConnectionResetError>\", \"supver-trailing\": \"<ConnectionResetError>\", \"extlen-short\": \"<ConnectionResetError>\", \"extlen-long\": \"<ConnectionResetError>\"} / sanity (整形 ClientHello -> 実バックエンド): OK / malformed ClientHello が 非 default へ振り分けられた: NO / default 振り分け先 (127.0.0.2:19010) への connect 拒否ログ: 7 件 / ssl preread debug 行: 18 件 / 拒否ログ例: 2026/11/18 18:19:25 [debug] 188687#0: *6 ssl preread: duplicate SNI"
+    },
+    "vuln-1.30.6": {
+      "cve": "CVE-2026-123640",
+      "configured": true,
+      "trigger": "stream ssl_preread (listen 127.0.0.1:18449) で map 振り分けを構成し、悪意ある ClientHello (SNI/ALPN 重複・trailing data・拡張長不一致) を送信。脆弱版は変数を抽出して非 default バックエンドへ振り分け、修正版は NGX_DECLINED で変数未設定 -> default (接続拒否) となる差で判定。",
+      "effect": "VULNERABLE",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-123640/run / 振り分け結果: {\"sni-valid\": \"real\", \"alpn-valid\": \"real\", \"dup-sni\": \"real\", \"dup-alpn\": \"real\", \"sni-trailing\": \"real\", \"alpn-trailing\": \"real\", \"supver-trailing\": \"real\", \"extlen-short\": \"real\", \"extlen-long\": \"real\"} / sanity (整形 ClientHello -> 実バックエンド): OK / malformed ClientHello が 非 default へ振り分けられた: YES / default 振り分け先 (127.0.0.2:19010) への connect 拒否ログ: 0 件 / ssl preread debug 行: 13 件"
+    },
+    "fixed-1.30.7": {
+      "cve": "CVE-2026-123640",
+      "configured": true,
+      "trigger": "stream ssl_preread (listen 127.0.0.1:18449) で map 振り分けを構成し、悪意ある ClientHello (SNI/ALPN 重複・trailing data・拡張長不一致) を送信。脆弱版は変数を抽出して非 default バックエンドへ振り分け、修正版は NGX_DECLINED で変数未設定 -> default (接続拒否) となる差で判定。",
+      "effect": "TRIGGERED",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-123640/run / 振り分け結果: {\"sni-valid\": \"real\", \"alpn-valid\": \"real\", \"dup-sni\": \"<ConnectionResetError>\", \"dup-alpn\": \"<ConnectionResetError>\", \"sni-trailing\": \"<ConnectionResetError>\", \"alpn-trailing\": \"<ConnectionResetError>\", \"supver-trailing\": \"<ConnectionResetError>\", \"extlen-short\": \"<ConnectionResetError>\", \"extlen-long\": \"<ConnectionResetError>\"} / sanity (整形 ClientHello -> 実バックエンド): OK / malformed ClientHello が 非 default へ振り分けられた: NO / default 振り分け先 (127.0.0.2:19010) への connect 拒否ログ: 7 件 / ssl preread debug 行: 18 件 / 拒否ログ例: 2026/11/18 18:19:27 [debug] 188712#0: *6 ssl preread: duplicate SNI"
+    }
+  },
+  "summary": {
+    "vuln-1.31.8": "VULNERABLE",
+    "fixed-1.31.9": "TRIGGERED",
+    "asan-vuln-1.31.8": "VULNERABLE",
+    "asan-fixed-1.31.9": "TRIGGERED",
+    "vuln-1.30.6": "VULNERABLE",
+    "fixed-1.30.7": "TRIGGERED"
+  }
+}

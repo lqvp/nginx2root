@@ -1,0 +1,96 @@
+{
+  "cve": "CVE-2026-118899",
+  "title": "TLS 1.3 request body 読取中の NGX_AGAIN 無限ループ (worker 100% CPU)",
+  "module": "modules/118899.py",
+  "reproduced": false,
+  "conclusion": "挙動差なし — 4 種のタイミングパターンで vuln(1.31.8) と fixed(1.31.9) の両方とも worker utime 増加 0.0 (CPU スピン無し)。debug ログでも body 読取中の SSL_ERROR_WANT_WRITE (『SSL read: want write』) は一度も発生せず、トリガ条件に到達しなかった。",
+  "environment": {
+    "port": 18452,
+    "workdir": "/app/data/sessions/conv-43/poc-run-H",
+    "client": "Python 3.12 ssl.SSLObject/MemoryBIO + ctypes SSL_key_update (TLSv1.3)",
+    "openssl_client": "OpenSSL 3.0.22 25 Aug 2026 (libssl.so.3)",
+    "clock_ticks_hz": 100,
+    "spin_judge": "cpu_delta_ticks >= 0.75 * window * HZ (2 秒窓で 150 tick 以上)"
+  },
+  "runs": [
+    {
+      "binary": "build/inst-vuln/sbin/nginx",
+      "nginx_version": "1.31.8 (vuln)",
+      "runs": ["vuln-run1.out", "vuln-run2.out", "vuln-run3.out", "vuln-run4.out", "vuln-run6.out"],
+      "attempts": [
+        {"pattern": "p1-ku_with_body", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p2-ku_alone_then_body", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p3-partial_read_then_ku", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p4-ku_immediate_with_body", "cpu_delta_sec": 0.0, "spin": false}
+      ],
+      "debug_probe": {
+        "workdir": "poc-run-H-dbg1 (error_log debug)",
+        "want_write_hits": 0,
+        "body_recv_msgs": 19,
+        "ssl_write_want_write": "SSL_write: -1 ×22 (応答書き込みが WANT_WRITE でブロック)",
+        "read_path": "SSL_get_error: 2 (WANT_READ) ×15 のみ。SSL_get_error: 3 (WANT_WRITE) は読取経路で 0 回",
+        "note": "body 読取中は常に WANT_READ。『SSL read: want write』は 0 件"
+      },
+      "effect": "TRIGGERED",
+      "detail": "KeyUpdate + body 再開のシナリオを実行したが utime 激増なし (挙動差なし)"
+    },
+    {
+      "binary": "build/inst-fixed/sbin/nginx",
+      "nginx_version": "1.31.9 (fixed)",
+      "runs": ["fixed-run1.out"],
+      "attempts": [
+        {"pattern": "p1-ku_with_body", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p2-ku_alone_then_body", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p3-partial_read_then_ku", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p4-ku_immediate_with_body", "cpu_delta_sec": 0.0, "spin": false}
+      ],
+      "debug_probe": {
+        "workdir": "poc-run-H-dbg2 (error_log debug)",
+        "want_write_hits": 0,
+        "body_recv_msgs": 19,
+        "ssl_write_want_write": "SSL_write: -1 ×22 / SSL_get_error: 3 ×22 (応答書き込み WANT_WRITE)",
+        "read_path": "SSL_get_error: 2 (WANT_READ) ×15 のみ"
+      },
+      "effect": "TRIGGERED",
+      "detail": "KeyUpdate + body 再開のシナリオを実行したが utime 激増なし (挙動差なし)"
+    },
+    {
+      "binary": "build/inst-asan-vuln/sbin/nginx",
+      "nginx_version": "1.31.8 ASan",
+      "runs": ["poc-run-H-asan-vuln/run1.out"],
+      "attempts": [
+        {"pattern": "p1-ku_with_body", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p2-ku_alone_then_body", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p3-partial_read_then_ku", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p4-ku_immediate_with_body", "cpu_delta_sec": 0.0, "spin": false}
+      ],
+      "effect": "TRIGGERED",
+      "detail": "ASan 版でも utime 激増なし"
+    },
+    {
+      "binary": "build/inst-asan-fixed/sbin/nginx",
+      "nginx_version": "1.31.9 ASan",
+      "runs": ["poc-run-H-asan-fixed/run1.out"],
+      "attempts": [
+        {"pattern": "p1-ku_with_body", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p2-ku_alone_then_body", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p3-partial_read_then_ku", "cpu_delta_sec": 0.0, "spin": false},
+        {"pattern": "p4-ku_immediate_with_body", "cpu_delta_sec": 0.0, "spin": false}
+      ],
+      "effect": "TRIGGERED",
+      "detail": "ASan 版でも utime 激増なし"
+    }
+  ],
+  "scenario": [
+    "backend (モック) はリクエストヘッダ受領後ただちに 16MB 応答を送出",
+    "クライアントは TLS1.3 MemoryBIO で POST (Content-Length 100MB)、SO_RCVBUF=4096 + TCP_WINDOW_CLAMP で応答を受信拒否 → nginx の SSL_write が WANT_WRITE でブロック",
+    "SSL_key_update() で TLS1.3 KeyUpdate(update_requested) レコードを注入 (ctypes: SSL_key_update + SSL_do_handshake、オフセット 24 で SSL* 取得、SSL_get_version=b'TLSv1.3' で検証済み)",
+    "body 送信再開 → nginx の body 読取中に KeyUpdate 応答の書き込みが必要になるはず (期待値)",
+    "2 秒窓で worker の /proc/<pid>/stat utime 増分を計測"
+  ],
+  "why_not_reached": [
+    "debug ログで body 読取中の ngx_ssl_recv は常に SSL_ERROR_WANT_READ (SSL_get_error: 2) であり、WANT_WRITE は一度も返らない",
+    "KeyUpdate 処理時に OpenSSL 3.0.22 のレコード層は応答 KeyUpdate を即時書き込むのではなく、保留中の SSL_write (wpend) の完了後に行うため、body 読取中の SSL_read が WANT_WRITE を返す状況が作れなかった (アップロード版の OpenSSL 4.1 での分析と同様の挙動)",
+    "応答書き込み経路の WANT_WRITE (SSL_write: -1 ×22) は再現しており、c->write がブロックされる状況自体は成立していた。不足しているのは読取経路 (SSL_read) での WANT_WRITE のみ"
+  ]
+}

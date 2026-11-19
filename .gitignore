@@ -1,0 +1,67 @@
+# nginx2root - GitHub 公開用 .gitignore
+# 実行時に生成されるワークディレクトリ・ログ・証明書等をリポジトリから除外します。
+
+# --- Python 実行時生成物 ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.eggs/
+build_eggs/
+develop-eggs/
+
+# --- PoC 実行時ワークディレクトリ ---
+run/
+poc-run-*/
+tmp/
+workdir/
+
+# --- 実行ログ・一時ファイル ---
+logs/
+*.log
+*.pid
+*.out
+*.err
+
+# --- コアダンプ ---
+*.core
+core.*
+core
+
+# --- 証明書・秘密鍵（実行時に生成されるもの）---
+certs/
+*.pem
+*.key
+*.csr
+*.crt
+*.p12
+*.pfx
+
+# --- OS・エディタ生成物 ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# --- ビルド成果物（scripts/build-nginx.sh が生成）---
+build/
+dist/
+
+# =====================================================================
+# 【ignore 対象外（実証記録としてリポジトリに含めるもの）】
+#  - modules/*.result.json   ... 各 CVE モジュールの実証結果（成果物）
+#  - RESULTS.md              ... 本環境での全 CVE 検証結果の差分表
+#  - modules/NOTES-*.md      ... 各 CVE の技術メモ（実証記録）
+#  - docs/                   ... CVE 別の技術解説（清書版）
+#  上記は実行時に生成されるわけではなく、成果物として同梱します。
+# =====================================================================
+
+# --- labs/ 配下の同梱テスト証明書は成果物のため除外しない ---
+# （上記 certs/ *.pem 等のパターンが labs/**/certs/ にも効いてしまうため、
+#   意図 #769 でリポジトリに同梱したテスト用証明書を明示的に除外解除）
+!labs/**/certs/
+!labs/**/certs/**

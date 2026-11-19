@@ -1,0 +1,58 @@
+{
+  "cve": "CVE-2026-125283",
+  "module": "modules/125283.py",
+  "generated_at": "2026-11-18T18:18:40",
+  "port": 18448,
+  "workdir": "/app/data/sessions/conv-43/poc-run-F",
+  "results": {
+    "vuln": {
+      "cve": "CVE-2026-125283",
+      "configured": true,
+      "trigger": true,
+      "effect": "TRIGGERED",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx / nginx version: nginx/1.31.8 / request: GET /a/x → HTTP/1.1 404 Not Found / prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run / POCDBG predicted=2 actual=6 alias=3 n=-1 (len-alias がアンダーフロー) / debug ログのパス文字列が破損: 'p/data/sessions/conv-43/poc-run-F/cve-2026-125283/run/html//a/xM' (期待 '/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run/html/xM') — memmove が バッファを alias=3 バイトだけ左へずらしたメモリ破壊",
+      "binary": "/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx"
+    },
+    "fixed": {
+      "cve": "CVE-2026-125283",
+      "configured": true,
+      "trigger": false,
+      "effect": "TRIGGERED",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-fixed/sbin/nginx / nginx version: nginx/1.31.9 / request: GET /a/x → HTTP/1.1 404 Not Found / prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run / パス文字列は正常 ('/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run/html/xM')、ASAN レポート無し — 修正版の挙動",
+      "binary": "/app/data/sessions/conv-43/build/inst-fixed/sbin/nginx"
+    },
+    "asan-vuln": {
+      "cve": "CVE-2026-125283",
+      "configured": true,
+      "trigger": true,
+      "effect": "CRASH",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-asan-vuln/sbin/nginx / nginx version: nginx/1.31.8 / request: GET /a/x → <EOF (no response)> / prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run / ASAN: ERROR: AddressSanitizer: negative-size-param: (size=-1) / memmove の size が size_t でアンダーフロー (len=2 < alias=3 → len-alias=SIZE_MAX)、try_files_module.c:196 の ngx_memmove で検出 / worker 異常終了: worker process 188399 exited on signal 6",
+      "binary": "/app/data/sessions/conv-43/build/inst-asan-vuln/sbin/nginx"
+    },
+    "asan-fixed": {
+      "cve": "CVE-2026-125283",
+      "configured": true,
+      "trigger": false,
+      "effect": "TRIGGERED",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-asan-fixed/sbin/nginx / nginx version: nginx/1.31.9 / request: GET /a/x → HTTP/1.1 404 Not Found / prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run / パス文字列は正常 ('/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run/html/xM')、ASAN レポート無し — 修正版の挙動",
+      "binary": "/app/data/sessions/conv-43/build/inst-asan-fixed/sbin/nginx"
+    },
+    "vuln1306": {
+      "cve": "CVE-2026-125283",
+      "configured": true,
+      "trigger": true,
+      "effect": "TRIGGERED",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-vuln1306/sbin/nginx / nginx version: nginx/1.30.6 / request: GET /a/x → HTTP/1.1 404 Not Found / prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run / debug ログのパス文字列が破損: 'p/data/sessions/conv-43/poc-run-F/cve-2026-125283/run/html//a/xM' (期待 '/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run/html/xM') — memmove が バッファを alias=3 バイトだけ左へずらしたメモリ破壊",
+      "binary": "/app/data/sessions/conv-43/build/inst-vuln1306/sbin/nginx"
+    },
+    "fixed1307": {
+      "cve": "CVE-2026-125283",
+      "configured": true,
+      "trigger": false,
+      "effect": "TRIGGERED",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-fixed1307/sbin/nginx / nginx version: nginx/1.30.7 / request: GET /a/x → HTTP/1.1 404 Not Found / prefix=/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run / パス文字列は正常 ('/app/data/sessions/conv-43/poc-run-F/cve-2026-125283/run/html/xM')、ASAN レポート無し — 修正版の挙動",
+      "binary": "/app/data/sessions/conv-43/build/inst-fixed1307/sbin/nginx"
+    }
+  },
+  "summary": "1.31.8 (vuln) は map 正規表現の r->captures 書き換え副作用で try_files の 長さ予測 (len=2) と実際の書き込み長 (6) がずれ、len-alias が size_t で アンダーフロー。asan-vuln は negative-size-param (size=-1) で worker が signal 6、非 ASAN の vuln/vuln1306 は debug ログのパス文字列破損でメモリ破壊を確認。fixed/fixed1307/asan-fixed はパス正常・404 で再現せず。"
+}

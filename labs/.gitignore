@@ -1,0 +1,24 @@
+# labs/ 用 .gitignore
+# docker compose 実行時に生成される volume ディレクトリ等を除外します。
+# （labs/<CVE>/certs/ のテスト証明書はリポジトリ同梱の成果物のため、
+#   ルートの .gitignore 側で明示的に除外解除しています。証明書類の
+#   *.pem / *.key / *.csr パターンはルート側で一括制御します。）
+
+# --- compose が生成する volume ディレクトリ ---
+data/
+*/data/
+volumes/
+*/volumes/
+tmp/
+*/tmp/
+logs/
+*/logs/
+run/
+*/run/
+
+# --- compose 実行ログ ---
+*.log
+*.pid
+
+# --- OS 生成物 ---
+.DS_Store

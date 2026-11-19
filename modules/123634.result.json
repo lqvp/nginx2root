@@ -1,0 +1,28 @@
+{
+  "cve": "CVE-2026-123634",
+  "binary": {
+    "1.31.8": "/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx",
+    "1.31.9": "/app/data/sessions/conv-43/build/inst-fixed/sbin/nginx"
+  },
+  "version": {
+    "1.31.8": "nginx version: nginx/1.31.8",
+    "1.31.9": "nginx version: nginx/1.31.9"
+  },
+  "results": {
+    "1.31.8": {
+      "cve": "CVE-2026-123634",
+      "configured": true,
+      "trigger": "resolver 環境で mirror サブリクエストと main が同一名 (Host) を解決待ちにし、DNS が NXDOMAIN を返した直後にクライアントが RST。main の 502 書き込み失敗 → terminate → mirror の解決 ctx 解放 → resolver 待ちリスト走査で UAF。",
+      "effect": "CRASH",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-B/cve-2026-123634/run / リクエスト送信数=10 / DNS クエリ数=10 / backend ヒット数=0 / resolve 実行ログ数=4 / クラッシュ: 2026/11/18 16:47:02 [alert] 133855#0: worker process 133857 exited on signal 11 / 検出したワーカー異常終了: 2 件 / 解放済み ctx の done() 検出 ([alert] could not cancel): 2026/11/18 16:47:02 [alert] 133857#0: could not cancel u0.test resolving / could not cancel 検出数: 2 件"
+    },
+    "1.31.9": {
+      "cve": "CVE-2026-123634",
+      "configured": true,
+      "trigger": "resolver 環境で mirror サブリクエストと main が同一名 (Host) を解決待ちにし、DNS が NXDOMAIN を返した直後にクライアントが RST。main の 502 書き込み失敗 → terminate → mirror の解決 ctx 解放 → resolver 待ちリスト走査で UAF。",
+      "effect": "TRIGGERED",
+      "detail": "prefix=/app/data/sessions/conv-43/poc-run-B/cve-2026-123634/run / リクエスト送信数=30 / DNS クエリ数=30 / backend ヒット数=0 / resolve 実行ログ数=30 / 同一経路を実行 ([debug] could not cancel / 1.31.9 の free_handler 経由): 2026/11/18 16:47:03 [debug] 133870#0: could not cancel u0.test resolving / could not cancel 検出数: 30 件 (alert ではなく debug) / 修正版の可能性: 同一経路を実行したがクラッシュせず"
+    }
+  },
+  "summary": "1.31.8 は worker が signal 11 で異常終了 (CRASH)。1.31.9 は同一経路 ([debug] could not cancel) を 30 回踏むがクラッシュしない (TRIGGERED)。"
+}

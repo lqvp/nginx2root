@@ -1,0 +1,40 @@
+{
+  "cve": "CVE-2026-120993",
+  "binary": {
+    "1.31.8 (vuln)": "/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx",
+    "1.31.9 (fixed)": "/app/data/sessions/conv-43/build/inst-fixed/sbin/nginx",
+    "1.31.8 ASan (asan-vuln)": "/app/data/sessions/conv-43/build/inst-asan-vuln/sbin/nginx",
+    "1.31.9 ASan (asan-fixed)": "/app/data/sessions/conv-43/build/inst-asan-fixed/sbin/nginx"
+  },
+  "results": {
+    "1.31.8 (vuln)": {
+      "cve": "CVE-2026-120993",
+      "configured": true,
+      "trigger": true,
+      "effect": "CRASH",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx / version=nginx version: nginx/1.31.8 / prefix=/app/data/sessions/conv-43/poc-run-G/cve-2026-120993 / 接続結果=[{'conn': 0, 'reused': False, 'data': b'UPSTREAM'}, {'conn': 1, 'reused': True, 'data': b''}, {'conn': 2, 'reused': False, 'data': b'UPSTREAM'}] / session_reused=[False, True, False] / upstream 応答=[True, False, True] / worker signal 終了=1 件 ['11'] / worker exit code 終了=0 件 [] / クラッシュ例: worker process 188577 exited on signal 11 / TLS1.2 セッション再開 (reused=True) 時に PROXY v2 の SSL TLV 生成で X509_get_signature_nid(NULL) → SIGSEGV"
+    },
+    "1.31.9 (fixed)": {
+      "cve": "CVE-2026-120993",
+      "configured": true,
+      "trigger": false,
+      "effect": "TRIGGERED",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-fixed/sbin/nginx / version=nginx version: nginx/1.31.9 / prefix=/app/data/sessions/conv-43/poc-run-G/cve-2026-120993 / 接続結果=[{'conn': 0, 'reused': False, 'data': b'UPSTREAM'}, {'conn': 1, 'reused': True, 'data': b'UPSTREAM'}, {'conn': 2, 'reused': True, 'data': b'UPSTREAM'}] / session_reused=[False, True, True] / upstream 応答=[True, True, True] / worker signal 終了=0 件 [] / worker exit code 終了=0 件 [] / 同一経路（フルハンドシェイク＋セッション再開）を実行したがクラッシュせず、再開接続も upstream へ中継された（修正版の可能性）"
+    },
+    "1.31.8 ASan (asan-vuln)": {
+      "cve": "CVE-2026-120993",
+      "configured": true,
+      "trigger": true,
+      "effect": "CRASH",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-asan-vuln/sbin/nginx / version=nginx version: nginx/1.31.8 / prefix=/app/data/sessions/conv-43/poc-run-G/cve-2026-120993 / 接続結果=[{'conn': 0, 'reused': False, 'data': b'UPSTREAM'}, {'conn': 1, 'reused': True, 'data': b''}, {'conn': 2, 'reused': True, 'data': b''}] / session_reused=[False, True, True] / upstream 応答=[True, False, False] / worker signal 終了=2 件 ['6', '6'] / worker exit code 終了=0 件 [] / ASan レポート検出=True / ASan 概要: ================================================================= | ==188602==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000088 (pc 0x7f426bba0140 bp 0x7ffded9b9400 sp 0x7ffded9b9218 T0) | ==188602==The signal is caused by a READ memory access. | ==188602==Hint: address points to the zero page. |     #0 0x7f426bba0140 in X509_get_signature_nid (/lib/x86_64-linux-gnu/libcrypto.so.3+0x2f0140) |     #1 0x48375b in ngx_proxy_protocol_v2_ssl_sub src/core/ngx_proxy_protocol.c:957 |  / クラッシュ例: worker process 188602 exited on signal 6 / TLS1.2 セッション再開 (reused=True) 時に PROXY v2 の SSL TLV 生成で X509_get_signature_nid(NULL) → SIGSEGV"
+    },
+    "1.31.9 ASan (asan-fixed)": {
+      "cve": "CVE-2026-120993",
+      "configured": true,
+      "trigger": false,
+      "effect": "TRIGGERED",
+      "detail": "binary=/app/data/sessions/conv-43/build/inst-asan-fixed/sbin/nginx / version=nginx version: nginx/1.31.9 / prefix=/app/data/sessions/conv-43/poc-run-G/cve-2026-120993 / 接続結果=[{'conn': 0, 'reused': False, 'data': b'UPSTREAM'}, {'conn': 1, 'reused': True, 'data': b'UPSTREAM'}, {'conn': 2, 'reused': True, 'data': b'UPSTREAM'}] / session_reused=[False, True, True] / upstream 応答=[True, True, True] / worker signal 終了=0 件 [] / worker exit code 終了=0 件 [] / 同一経路（フルハンドシェイク＋セッション再開）を実行したがクラッシュせず、再開接続も upstream へ中継された（修正版の可能性）"
+    }
+  },
+  "summary": "1.31.8 (vuln): TLS1.2 セッション再開 (reused=True) 接続で worker が signal 11 (SEGV) で異常終了 → CRASH。1.31.9 (fixed): 同一経路を実行してもクラッシュせず、再開接続も upstream (19011) へ中継されて UPSTREAM 応答が返る → TRIGGERED。ASan 版も同様 (asan-vuln は X509_get_signature_nid NULL 参照の ASan SEGV レポート、asan-fixed はクラッシュなし)。"
+}

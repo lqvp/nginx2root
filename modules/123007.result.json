@@ -1,0 +1,159 @@
+{
+ "cve": "CVE-2026-123007",
+ "module": "modules/123007.py",
+ "generated_at": "2026-11-18T17:40:00",
+ "host": "127.0.0.1",
+ "port": 18443,
+ "workdir": "/app/data/sessions/conv-43/poc-run-A",
+ "environment": {
+  "vuln_binary": "/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx",
+  "vuln_version": "nginx/1.31.8",
+  "fixed_binary": "/app/data/sessions/conv-43/build/inst-fixed/sbin/nginx",
+  "fixed_version": "nginx/1.31.9",
+  "python": "3.12 (ssl.MemoryBIO, libssl.so.3)"
+ },
+ "summary": {
+  "vuln_quick": "ACCEPT",
+  "fixed_quick": "FLOWCTRL",
+  "difference": "1.31.8 は cleanup の 1,792 バイト返却で接続ウィンドウが MAX+1792 になり、アンダーフローした検査が WU(0,MAX) を受理する (ACCEPT)。1.31.9 は send_queued 込みの検査で WU(0,MAX) を拒否する (FLOWCTRL)。",
+  "amplifier": "公式 simple-trigger-full-dbg.py の crash amplifier (512 本の 0xffffff バイト HEAD carrier + 1 バイト Range sink + WU(0,MAX) 2^32 回 = 52GiB + 127 回の sink 交代 + 最終 WU(sink,1)) を 123007.py に移植。1.31.8 は 121.2 秒で worker が SIGSEGV (error.log: worker process 183488 exited on signal 11) し effect=CRASH。1.31.9 は同じ手順でも oracle が成立せず FLOWCTRL のまま (クラッシュなし)。"
+ },
+ "config_notes": {
+  "keepalive_requests": "112GiB 経路で 1000 リクエストを超えるため keepalive_requests 100000。",
+  "send_timeout": "sink の応答待ちが既定 60s を超えるため send_timeout 600s を追加。60s では client timed out (110: Connection timed out) while sending response to client で打ち切られ、600s では sink に 1 バイト DATA が返る。"
+ },
+ "runs": [
+  {
+   "label": "vuln-1.31.8-quick",
+   "command": "python3 modules/123007.py --binary build/inst-vuln/sbin/nginx --quick",
+   "driver_command": "cd /app/data/tasks/10/i530 && python3 drive.py vuln-1.31.8-quick /app/data/sessions/conv-43/build/inst-vuln/sbin/nginx 1 None",
+   "binary": "/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx",
+   "nginx_version": "nginx version: nginx/1.31.8",
+   "quick": true,
+   "wu_budget_gb": null,
+   "duration_sec": 19.815,
+   "frames_received": 162,
+   "result": {
+    "cve": "CVE-2026-123007",
+    "configured": true,
+    "trigger": true,
+    "effect": "ACCEPT",
+    "detail": "oracle 成立: RST_STREAM(149,151)=FLOW_CONTROL_ERROR(3)、stream 155 に 10 バイト DATA(END_STREAM)、PING ACK=True、受信フレーム数=162 (公開応答 896 バイト) / 接続ウィンドウ MAX+1792 への返却後、アンダーフローした検査が WU(0,MAX) を受理した"
+   }
+  },
+  {
+   "label": "fixed-1.31.9-quick",
+   "command": "python3 modules/123007.py --binary build/inst-fixed/sbin/nginx --quick",
+   "driver_command": "cd /app/data/tasks/10/i530 && python3 drive.py fixed-1.31.9-quick /app/data/sessions/conv-43/build/inst-fixed/sbin/nginx 1 None",
+   "binary": "/app/data/sessions/conv-43/build/inst-fixed/sbin/nginx",
+   "nginx_version": "nginx version: nginx/1.31.9",
+   "quick": true,
+   "wu_budget_gb": null,
+   "duration_sec": 15.978,
+   "frames_received": 154,
+   "result": {
+    "cve": "CVE-2026-123007",
+    "configured": true,
+    "trigger": false,
+    "effect": "FLOWCTRL",
+    "detail": "oracle 不成立: RST_STREAM(149/151) が返らず、接続ウィンドウの返却が起きない / error.log: 2026/11/18 17:18:03 [info] 154541#0: *2 client violated connection flow control: received WINDOW_UPDATE frame with window increment 2147483647 not allowed for window 1792 while processing HTTP/2 connection, client: 127.0.0.1, server: 127.0.0.1:18443 / 受信フレーム数=154 / GOAWAY=[]"
+   }
+  },
+  {
+   "label": "vuln-1.31.8-crash-52gb",
+   "command": "python3 modules/123007.py --binary build/inst-vuln/sbin/nginx --wu-budget-gb 112",
+   "driver_command": "cd /app/data/tasks/10/i530 && python3 drive.py vuln-1.31.8-crash-52gb /app/data/sessions/conv-43/build/inst-vuln/sbin/nginx 0 112.0",
+   "binary": "/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx",
+   "nginx_version": "nginx version: nginx/1.31.8",
+   "quick": false,
+   "wu_budget_gb": 112.0,
+   "duration_sec": 121.187,
+   "frames_received": 803,
+   "result": {
+    "cve": "CVE-2026-123007",
+    "configured": true,
+    "trigger": true,
+    "effect": "CRASH",
+    "detail": "oracle 成立: RST_STREAM(149,151)=FLOW_CONTROL_ERROR(3)、stream 155 に 10 バイト DATA(END_STREAM)、PING ACK=True、受信フレーム数=162 (公開応答 896 バイト) / flood 用 HEAD carrier 512 本 (8589938688 バイト, stream 157-1179) / sink stream 1181 (bytes=0-0) をウィンドウ 0 で queued にした / WU(0,MAX) を 2^32 回 (52.00 GiB, 43.6 秒) 送り、接続ウィンドウを符号中点 2^63 を越えさせた / sink 所有者を 127 回交代 (最終 sink stream 1435) / 最終 sink 1435 に WU(sink,1) を送信 (limit = (ssize_t)(2^63+1790) = 負値) / WU(sink,1) 後に接続が閉じた (worker SIGSEGV の兆候) / error.log: 2026/11/18 17:37:31 [alert] 183487#0: worker process 183488 exited on signal 11"
+   },
+   "notes": "公式 crash amplifier の移植版。512 本の HEAD carrier (8,589,938,688 バイト) + bytes=0-0 の sink stream 1181 + WU(0,MAX) 2^32 回 (52.00 GiB, 43.6 秒) + sink 所有者 127 回交代 (最終 sink stream 1435) + WU(sink,1)。worker 183488 が SIGSEGV し、master が 'worker process 183488 exited on signal 11' を記録、代替 worker 185214 を起動。effect=CRASH。"
+  },
+  {
+   "label": "fixed-1.31.9-crash-52gb",
+   "command": "python3 modules/123007.py --binary build/inst-fixed/sbin/nginx --wu-budget-gb 112",
+   "driver_command": "cd /app/data/tasks/10/i530 && python3 drive.py fixed-1.31.9-crash-52gb /app/data/sessions/conv-43/build/inst-fixed/sbin/nginx 0 112.0",
+   "binary": "/app/data/sessions/conv-43/build/inst-fixed/sbin/nginx",
+   "nginx_version": "nginx version: nginx/1.31.9",
+   "quick": false,
+   "wu_budget_gb": 112.0,
+   "duration_sec": 19.641,
+   "frames_received": 154,
+   "result": {
+    "cve": "CVE-2026-123007",
+    "configured": true,
+    "trigger": false,
+    "effect": "FLOWCTRL",
+    "detail": "oracle 不成立: RST_STREAM(149/151) が返らず、接続ウィンドウの返却が起きない / error.log: 2026/11/18 17:38:20 [info] 185376#0: *2 client violated connection flow control: received WINDOW_UPDATE frame with window increment 2147483647 not allowed for window 1792 while processing HTTP/2 connection, client: 127.0.0.1, server: 127.0.0.1:18443 / 受信フレーム数=154 / GOAWAY=[]"
+   },
+   "notes": "同じ手順でも 1.31.9 は oracle が成立せず (send_queued 込みの検査で WU(0,MAX) が拒否)、クラッシュなし。effect=FLOWCTRL。"
+  },
+  {
+   "label": "vuln-1.31.8-smoke-05gb",
+   "command": "python3 modules/123007.py --binary build/inst-vuln/sbin/nginx --wu-budget-gb 0.5",
+   "driver_command": "cd /app/data/tasks/10/i530 && python3 drive.py vuln-1.31.8-smoke-05gb /app/data/sessions/conv-43/build/inst-vuln/sbin/nginx 0 0.5",
+   "binary": "/app/data/sessions/conv-43/build/inst-vuln/sbin/nginx",
+   "nginx_version": "nginx version: nginx/1.31.8",
+   "quick": false,
+   "wu_budget_gb": 0.5,
+   "duration_sec": 78.847,
+   "frames_received": 676,
+   "result": {
+    "cve": "CVE-2026-123007",
+    "configured": true,
+    "trigger": true,
+    "effect": "TRIGGERED",
+    "detail": "oracle 成立: RST_STREAM(149,151)=FLOW_CONTROL_ERROR(3)、stream 155 に 10 バイト DATA(END_STREAM)、PING ACK=True、受信フレーム数=162 (公開応答 896 バイト) / flood 用 HEAD carrier 512 本 (8589938688 バイト, stream 157-1179) / sink stream 1181 (bytes=0-0) をウィンドウ 0 で queued にした / WU(0,MAX) を 0.50 GiB (41297762 フレーム) 送信 (符号中点 2^63 まで 4294967296 フレーム) / wu_budget_gb 不足のため符号中点 2^63 未達 (TRIGGERED)"
+   },
+   "notes": "新しい crash amplifier 経路のスモークテスト (予算 0.5GiB)。carrier/sink/WU 送出は正常だが符号中点 2^63 未達のため TRIGGERED。"
+  }
+ ],
+ "interrupted_attempts": {
+  "vuln-1.31.8-nonquick-112gb-attempt1": {
+   "terminated_at": "2026-11-18 17:22:11",
+   "reason": "外部からの SIGQUIT（python drive.py は Quit (core dumped)、nginx も 154925 からの SIGQUIT で停止。モジュールの stop() は SIGTERM）",
+   "error_log_lines": [
+    "2026/11/18 17:22:11 [info] 154645#0: *2 client prematurely closed connection while processing HTTP/2 connection, client: 127.0.0.1, server: 127.0.0.1:18443",
+    "2026/11/18 17:22:11 [notice] 154644#0: signal 3 (SIGQUIT) received from 154925, shutting down"
+   ],
+   "follow_up": "前景で再実行し 250.154 秒で完走（runs の vuln-1.31.8-nonquick-112gb が再実行の記録）"
+  },
+  "vuln-1.31.8-nonquick-112gb-send_timeout_60s": {
+   "note": "send_timeout 600s 追加前（既定 60s）の 112GiB 実行。sink 応答は time out で打ち切られ、RST_STREAM(2615, error_code=1) と PING ACK を受信。",
+   "error_log_line": "2026/11/18 17:09:09 [info] 152657#0: *2 client timed out (110: Connection timed out) while sending response to client, client: 127.0.0.1, server: , request: \"GET /index.html HTTP/2.0\", host: \"127.0.0.1:18443\""
+  }
+ },
+ "previous_full_wrap_run": {
+  "note": "先行実行 (intent 465) はセッション終了で中断し、JSON 出力なし",
+  "command": "cd /app/data/sessions/conv-43 && : > poc-run-A/logs/error.log && nohup python3 modules/123007.py --binary build/inst-vuln/sbin/nginx > /app/data/tasks/10/i465/full-vuln.out 2>&1",
+  "output_file": "/app/data/tasks/10/i465/full-vuln.out",
+  "output_bytes": 0,
+  "started_at_log": "2026/11/18 16:54:42",
+  "aborted_at_log": "2026/11/18 16:55:51 [info] 137059#0: *2 SSL_read() failed (104: Connection reset by peer) while processing HTTP/2 connection",
+  "orphan_pids": [
+   137058,
+   137059
+  ],
+  "orphan_cleanup": "pid ファイル 137058 と /proc 走査で SIGTERM を送信。alive=[]、port 18443 listening=False、nginx.pid は削除された。"
+ },
+ "orphan_cleanup_observed": {
+  "pid_file_before": 153983,
+  "master_cmdline": "nginx: master process /app/data/sessions/conv-43/build/inst-vuln/sbin/nginx -p /app/data/sessions/conv-43/poc-run-A/ -c /app/data/sessions/conv-43/poc-run-A/nginx.conf",
+  "worker_pid": 153984,
+  "worker_cmdline": "nginx: worker process",
+  "listen_before": "/proc/net/tcp local 0100007F:480B state 0A",
+  "after": "master exists: no; worker exists: no; LISTEN 18443: False; nginx.pid removed",
+  "notes": "pkill は未使用。pid ファイルと /proc 走査で SIGTERM を送信し、各実行後に residual nginx: [] を確認した。"
+ },
+ "residual_issue": "本モジュールでは完全ラップ後も SIGSEGV / LEAK は未観測 (TRIGGERED)。send_timeout 600s で sink に 1 バイト DATA (0x0d) が返るようになったが、負の limit が TLS の巨大 memcpy にそのまま渡る形にはなっていない。公式実装との差（d_target、sink 応答形状、ストリームウィンドウの与え方）の調整が必要。",
+ "historical_runs_note": "2026-11-18 17:29 時点の旧実装 (2^64-65536 完全ラップ) による vuln-1.31.8-nonquick-2gb (TRIGGERED) と vuln-1.31.8-nonquick-112gb (TRIGGERED, sink に 1 バイト DATA) の記録は modules/NOTES-123007.md §9〜§10 に残している。"
+}

@@ -1,0 +1,197 @@
+{
+ "vuln": {
+  "cve": "CVE-2026-120967",
+  "configured": true,
+  "trigger": false,
+  "effect": "VERIFIED",
+  "detail": "同期完了 (最初の ngx_stream_ssl_handler 呼び出し内での SSL_do_handshake 完了) が発生しなかったため検証バイパス未発生。無効証明書/無証明書 + SNI の全試行 (10 件) は検証エラーで切断され、正規証明書は通過 (ctrl=['ACCEPT', 'ACCEPT'])。接続 17 件すべて 2 回以上の SSL_do_handshake 呼び出しで完了 (first-call 完了 0 件) のため 非同期経路の検証 (SNI 選択後の sscf) が有効。",
+  "version": "nginx version: nginx/1.31.8",
+  "attempts": {
+   "async_no-cert_tls12": "REJECT-data",
+   "async_no-cert_tls13": "REJECT-data",
+   "async_bad-cert_tls12": "REJECT-data",
+   "async_bad-cert_tls13": "REJECT-data",
+   "sync_no-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls13_1seg": "REJECT-io",
+   "sync_bad-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls12_split": "REJECT-data",
+   "sync_no-cert_tls12_mss": "REJECT-data",
+   "sync_no-cert_tls12_appdata": "REJECT SSLError",
+   "resume_tls12": "done",
+   "resume_tls13": "done",
+   "ctrl_good-cert_tls12": "ACCEPT",
+   "ctrl_good-cert_tls13": "ACCEPT"
+  },
+  "logstat": {
+   "connections": 17,
+   "first_call_complete": 0,
+   "verify_rejects": 12
+  }
+ },
+ "fixed": {
+  "cve": "CVE-2026-120967",
+  "configured": true,
+  "trigger": false,
+  "effect": "VERIFIED",
+  "detail": "同期完了 (最初の ngx_stream_ssl_handler 呼び出し内での SSL_do_handshake 完了) が発生しなかったため検証バイパス未発生。無効証明書/無証明書 + SNI の全試行 (10 件) は検証エラーで切断され、正規証明書は通過 (ctrl=['ACCEPT', 'ACCEPT'])。接続 17 件すべて 2 回以上の SSL_do_handshake 呼び出しで完了 (first-call 完了 0 件) のため 非同期経路の検証 (SNI 選択後の sscf) が有効。",
+  "version": "nginx version: nginx/1.31.9",
+  "attempts": {
+   "async_no-cert_tls12": "REJECT-data",
+   "async_no-cert_tls13": "REJECT-data",
+   "async_bad-cert_tls12": "REJECT-data",
+   "async_bad-cert_tls13": "REJECT-data",
+   "sync_no-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls13_1seg": "REJECT-io",
+   "sync_bad-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls12_split": "REJECT-data",
+   "sync_no-cert_tls12_mss": "REJECT-data",
+   "sync_no-cert_tls12_appdata": "REJECT SSLError",
+   "resume_tls12": "done",
+   "resume_tls13": "done",
+   "ctrl_good-cert_tls12": "ACCEPT",
+   "ctrl_good-cert_tls13": "ACCEPT"
+  },
+  "logstat": {
+   "connections": 17,
+   "first_call_complete": 0,
+   "verify_rejects": 12
+  }
+ },
+ "asan-vuln": {
+  "cve": "CVE-2026-120967",
+  "configured": true,
+  "trigger": false,
+  "effect": "VERIFIED",
+  "detail": "同期完了 (最初の ngx_stream_ssl_handler 呼び出し内での SSL_do_handshake 完了) が発生しなかったため検証バイパス未発生。無効証明書/無証明書 + SNI の全試行 (10 件) は検証エラーで切断され、正規証明書は通過 (ctrl=['ACCEPT', 'ACCEPT'])。接続 17 件すべて 2 回以上の SSL_do_handshake 呼び出しで完了 (first-call 完了 0 件) のため 非同期経路の検証 (SNI 選択後の sscf) が有効。",
+  "version": "nginx version: nginx/1.31.8",
+  "attempts": {
+   "async_no-cert_tls12": "REJECT-data",
+   "async_no-cert_tls13": "REJECT-data",
+   "async_bad-cert_tls12": "REJECT-data",
+   "async_bad-cert_tls13": "REJECT-data",
+   "sync_no-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls13_1seg": "REJECT-io",
+   "sync_bad-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls12_split": "REJECT-data",
+   "sync_no-cert_tls12_mss": "REJECT-data",
+   "sync_no-cert_tls12_appdata": "REJECT SSLError",
+   "resume_tls12": "done",
+   "resume_tls13": "done",
+   "ctrl_good-cert_tls12": "ACCEPT",
+   "ctrl_good-cert_tls13": "ACCEPT"
+  },
+  "logstat": {
+   "connections": 17,
+   "first_call_complete": 0,
+   "verify_rejects": 12
+  }
+ },
+ "asan-fixed": {
+  "cve": "CVE-2026-120967",
+  "configured": true,
+  "trigger": false,
+  "effect": "VERIFIED",
+  "detail": "同期完了 (最初の ngx_stream_ssl_handler 呼び出し内での SSL_do_handshake 完了) が発生しなかったため検証バイパス未発生。無効証明書/無証明書 + SNI の全試行 (10 件) は検証エラーで切断され、正規証明書は通過 (ctrl=['ACCEPT', 'ACCEPT'])。接続 17 件すべて 2 回以上の SSL_do_handshake 呼び出しで完了 (first-call 完了 0 件) のため 非同期経路の検証 (SNI 選択後の sscf) が有効。",
+  "version": "nginx version: nginx/1.31.9",
+  "attempts": {
+   "async_no-cert_tls12": "REJECT-data",
+   "async_no-cert_tls13": "REJECT-data",
+   "async_bad-cert_tls12": "REJECT-data",
+   "async_bad-cert_tls13": "REJECT-data",
+   "sync_no-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls13_1seg": "REJECT-io",
+   "sync_bad-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls12_split": "REJECT-data",
+   "sync_no-cert_tls12_mss": "REJECT-data",
+   "sync_no-cert_tls12_appdata": "REJECT SSLError",
+   "resume_tls12": "done",
+   "resume_tls13": "done",
+   "ctrl_good-cert_tls12": "ACCEPT",
+   "ctrl_good-cert_tls13": "ACCEPT"
+  },
+  "logstat": {
+   "connections": 17,
+   "first_call_complete": 0,
+   "verify_rejects": 12
+  }
+ },
+ "vuln1306": {
+  "cve": "CVE-2026-120967",
+  "configured": true,
+  "trigger": false,
+  "effect": "VERIFIED",
+  "detail": "同期完了 (最初の ngx_stream_ssl_handler 呼び出し内での SSL_do_handshake 完了) が発生しなかったため検証バイパス未発生。無効証明書/無証明書 + SNI の全試行 (10 件) は検証エラーで切断され、正規証明書は通過 (ctrl=['ACCEPT', 'ACCEPT'])。接続 17 件すべて 2 回以上の SSL_do_handshake 呼び出しで完了 (first-call 完了 0 件) のため 非同期経路の検証 (SNI 選択後の sscf) が有効。",
+  "version": "nginx version: nginx/1.30.6",
+  "attempts": {
+   "async_no-cert_tls12": "REJECT-data",
+   "async_no-cert_tls13": "REJECT-data",
+   "async_bad-cert_tls12": "REJECT-data",
+   "async_bad-cert_tls13": "REJECT-data",
+   "sync_no-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls13_1seg": "REJECT-io",
+   "sync_bad-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls12_split": "REJECT-data",
+   "sync_no-cert_tls12_mss": "REJECT-data",
+   "sync_no-cert_tls12_appdata": "REJECT SSLError",
+   "resume_tls12": "done",
+   "resume_tls13": "done",
+   "ctrl_good-cert_tls12": "ACCEPT",
+   "ctrl_good-cert_tls13": "ACCEPT"
+  },
+  "logstat": {
+   "connections": 17,
+   "first_call_complete": 0,
+   "verify_rejects": 12
+  }
+ },
+ "fixed1307": {
+  "cve": "CVE-2026-120967",
+  "configured": true,
+  "trigger": false,
+  "effect": "VERIFIED",
+  "detail": "同期完了 (最初の ngx_stream_ssl_handler 呼び出し内での SSL_do_handshake 完了) が発生しなかったため検証バイパス未発生。無効証明書/無証明書 + SNI の全試行 (10 件) は検証エラーで切断され、正規証明書は通過 (ctrl=['ACCEPT', 'ACCEPT'])。接続 17 件すべて 2 回以上の SSL_do_handshake 呼び出しで完了 (first-call 完了 0 件) のため 非同期経路の検証 (SNI 選択後の sscf) が有効。",
+  "version": "nginx version: nginx/1.30.7",
+  "attempts": {
+   "async_no-cert_tls12": "REJECT-data",
+   "async_no-cert_tls13": "REJECT-data",
+   "async_bad-cert_tls12": "REJECT-data",
+   "async_bad-cert_tls13": "REJECT-data",
+   "sync_no-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls13_1seg": "REJECT-io",
+   "sync_bad-cert_tls12_1seg": "REJECT-data",
+   "sync_no-cert_tls12_split": "REJECT-data",
+   "sync_no-cert_tls12_mss": "REJECT-data",
+   "sync_no-cert_tls12_appdata": "REJECT SSLError",
+   "resume_tls12": "done",
+   "resume_tls13": "done",
+   "ctrl_good-cert_tls12": "ACCEPT",
+   "ctrl_good-cert_tls13": "ACCEPT"
+  },
+  "logstat": {
+   "connections": 17,
+   "first_call_complete": 0,
+   "verify_rejects": 12
+  }
+ },
+ "probe_emulation": {
+  "available": true,
+  "binary": "/app/data/sessions/conv-43/poc-run-G/120967/probe/sbin/nginx",
+  "modes": {
+   "natural_async": {
+    "no_cert": "REJECT-data",
+    "bad_cert": "REJECT-data",
+    "good_cert": "ACCEPT"
+   },
+   "emul_sync_vulnerable": {
+    "no_cert": "ACCEPT",
+    "bad_cert": "ACCEPT",
+    "good_cert": "ACCEPT"
+   },
+   "emul_sync_fixed": {
+    "no_cert": "REJECT-data",
+    "bad_cert": "REJECT-data",
+    "good_cert": "ACCEPT"
+   }
+  }
+ }
+}

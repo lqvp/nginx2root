@@ -1,0 +1,49 @@
+{
+  "cve": "CVE-2026-121810",
+  "title": "HTTP/3 (QUIC) ストリーム生成中の drain による親接続 use-after-free",
+  "module": "modules/121810.py",
+  "generated_at": "2026-11-18T16:51:23",
+  "environment": {
+    "quic_port": 18446,
+    "tcp_tls_port": 18447,
+    "worker_connections": 16,
+    "workdir": "/app/data/sessions/conv-43/poc-run-C",
+    "client": "aioquic",
+    "vuln_binary": "build/inst-vuln/sbin/nginx (nginx/1.31.8, --with-http_v3_module)",
+    "fixed_binary": "build/inst-fixed-v3/sbin/nginx (nginx/1.31.9, build/v1.31.9 から --with-http_v3_module 付きで新規 prefix にビルド)"
+  },
+  "results": {
+    "nginx_1_31_8": {
+      "cve": "CVE-2026-121810",
+      "configured": true,
+      "trigger": true,
+      "effect": "CRASH",
+      "detail": "nginx/1.31.8 でクラッシュを再現した。\nerror_log 原文: worker process 135527 exited on signal 11\n生成中の stream 0x4 の ngx_get_connection() 内 drain で、親 QUIC 接続 (*1) が reusable キューへ誤って戻されることを確認: *1 reusable connection: 1\n直後の proxy_pass upstream 接続取得時の drain が親 *1 を選び、close により 進行中リクエストのメモリが解放されて use-after-free となる。\n試行: attempt 1: hold=8 handshake=True z=True drain=True requeue=True crash=True\nログ: /app/data/sessions/conv-43/poc-run-C/logs/error.log"
+    },
+    "nginx_1_31_9_v3": {
+      "cve": "CVE-2026-121810",
+      "configured": true,
+      "trigger": true,
+      "effect": "TRIGGERED",
+      "detail": "nginx/1.31.9 では同一シナリオで signal 11 が発生しなかった（修正版の挙動）。\ndrain は発生している: \"worker_connections are not enough, reusing connections\"\n1.31.9 では rbtree 挿入が ngx_get_connection() より前に移動したため、生成中ストリームが can_shutdown に認識され、親 QUIC 接続は reusable キューへ戻らない。その結果、後続の upstream 接続取得時にも親は選ばれず、リクエストが解放されない。\n試行: attempt 1: hold=8 handshake=True z=True drain=True requeue=False crash=False / attempt 2: hold=9 handshake=True z=True drain=True requeue=False crash=False\nログ: /app/data/sessions/conv-43/poc-run-C/fixed-v3/logs/error.log"
+    },
+    "nginx_1_31_9_existing": {
+      "cve": "CVE-2026-121810",
+      "configured": true,
+      "trigger": true,
+      "effect": "TRIGGERED",
+      "detail": "nginx/1.31.9 では同一シナリオで signal 11 が発生しなかった（修正版の挙動）。\ndrain は発生している: \"worker_connections are not enough, reusing connections\"\n1.31.9 では rbtree 挿入が ngx_get_connection() より前に移動したため、生成中ストリームが can_shutdown に認識され、親 QUIC 接続は reusable キューへ戻らない。その結果、後続の upstream 接続取得時にも親は選ばれず、リクエストが解放されない。\n試行: attempt 1: hold=8 handshake=True z=True drain=True requeue=False crash=False / attempt 2: hold=9 handshake=True z=True drain=True requeue=False crash=False\nログ: /app/data/sessions/conv-43/poc-run-C/fixed/logs/error.log"
+    }
+  },
+  "summary": {
+    "nginx_1_31_8": "CRASH",
+    "nginx_1_31_9_v3": "TRIGGERED",
+    "conclusion": "1.31.8 は同一シナリオで signal 11 (CRASH)。1.31.9(v3 ビルド) は drain は発生するがクラッシュしない (TRIGGERED)。修正は ngx_quic_create_stream() の rbtree 挿入を ngx_get_connection() より前へ移動したもの。"
+  },
+  "reproduce": [
+    "cd /app/data/sessions/conv-43",
+    "python3 modules/121810.py build/inst-vuln/sbin/nginx poc-run-C 127.0.0.1",
+    "python3 modules/121810.py build/inst-fixed-v3/sbin/nginx poc-run-C/fixed-v3 127.0.0.1"
+  ],
+  "notes_file": "modules/NOTES-121810.md"
+}

@@ -1,0 +1,43 @@
+{
+  "cve": "CVE-2026-113425",
+  "module": "modules/113425.py",
+  "notes": "modules/NOTES-113425.md",
+  "generated_at": "2026-11-18T16:50:38",
+  "binary_vuln": {
+    "path": "build/inst-vuln/sbin/nginx",
+    "version": "nginx/1.31.8",
+    "result": {
+      "cve": "CVE-2026-113425",
+      "configured": true,
+      "trigger": true,
+      "effect": "CRASH",
+      "detail": "binary=build/inst-vuln/sbin/nginx / version=nginx version: nginx/1.31.8 / prefix=/app/data/sessions/conv-43/poc-run-D / 試行回数=1 / CAPABILITY 応答長=200151 bytes / 1 試行あたり 40 コマンド / worker 異常終了 (signal) 検出数=1 / auth 待機中のクライアント write ハンドラ失敗 (while in auth state) 検出数=1 / クラッシュ例: worker process 135178 exited on signal 11 / auth 待機中の送信失敗例: 2026/11/18 16:50:05 [info] 135178#0: *5 send() failed (104: Connection reset by peer) while in http auth state, client: 127.0.0.1, server: 127.0.0.1:21143, login: \"test\" / auth_http 応答時に解放済みセッションを参照して UAF → signal 11"
+    }
+  },
+  "binary_fixed": {
+    "path": "build/inst-fixed/sbin/nginx",
+    "version": "nginx/1.31.9",
+    "result": {
+      "cve": "CVE-2026-113425",
+      "configured": true,
+      "trigger": false,
+      "effect": "TRIGGERED",
+      "detail": "binary=build/inst-fixed/sbin/nginx / version=nginx version: nginx/1.31.9 / prefix=/app/data/sessions/conv-43/poc-run-D / 試行回数=40 / CAPABILITY 応答長=200151 bytes / 1 試行あたり 40 コマンド / worker 異常終了 (signal) 検出数=0 / auth 待機中のクライアント write ハンドラ失敗 (while in auth state) 検出数=0 / 同一経路を実行したがクラッシュせず（修正版の可能性）"
+    }
+  },
+  "pretest": {
+    "iterations": 40,
+    "crash_vuln": 40,
+    "crash_fixed": 0,
+    "condition": "IMAP CAPABILITY x40 + 200ms no-read + LOGIN + drain(40x200151B) + SO_LINGER RST + 300ms auth delay"
+  },
+  "summary": "1.31.8 では同一条件 40/40 で worker が signal 11（auth_http 応答時に解放済みセッションを参照する UAF）。1.31.9 では 0/40 でクラッシュせず、auth 待機中の write ハンドラが block_write に変更された修正を確認。モジュールは 1.31.8 で effect=CRASH/trigger=true、1.31.9 で effect=TRIGGERED/trigger=false を返す。",
+  "ports": {
+    "pop3": 21110,
+    "imap": 21143,
+    "smtp": 21025,
+    "auth_http": 19001,
+    "backend": 21210
+  },
+  "workdir": "/app/data/sessions/conv-43/poc-run-D"
+}
